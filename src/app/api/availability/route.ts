@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createSupabaseAdminClient } from '@/lib/supabase/admin';
-import { computeAvailableSlots, type WorkingHours } from '@/lib/availability';
+import { athensOffsetMinutes, computeAvailableSlots, type WorkingHours } from '@/lib/availability';
 import { availabilityQuerySchema } from '@/lib/validation';
 import { FALLBACK_SERVICES } from '@/lib/fallback-data';
 import { FALLBACK_WORKING_HOURS } from '@/lib/fallback-hours';
@@ -67,14 +67,29 @@ export async function GET(request: NextRequest) {
     endsAt: a.ends_at,
   }));
 
+  const now = new Date();
   const slots = computeAvailableSlots({
     workingHours,
     daysOff,
     date,
     durationMin: service.duration_min,
     existingAppointments,
-    now: new Date(),
+    now,
   });
+
+  if (request.nextUrl.searchParams.get('debug') === '1') {
+    return NextResponse.json({
+      slots,
+      debug: {
+        date,
+        nowIso: now.toISOString(),
+        workingHours,
+        durationMin: service.duration_min,
+        weekdayFromDate: new Date(`${date}T12:00:00Z`).getUTCDay(),
+        athensOffsetMinutes: athensOffsetMinutes(date),
+      },
+    });
+  }
 
   return NextResponse.json({ slots });
 }

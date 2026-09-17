@@ -1,0 +1,127 @@
+@import "tailwindcss";
+
+:root {
+  --color-paper: #ffffff;
+  --color-stone: #efeeeb;
+  --color-ink: #101010;
+  --color-mute: #6e6e6b;
+  --color-line: #dcdad5;
+  --color-pole: #b32b2b;
+  --color-brass: #c6a15b;
+  /* Darkened brass for text on light surfaces — the raw brass sits at 2.1:1 there. */
+  --color-brass-ink: #8a6a29;
+  /* Reserved status hue: a completed, paid visit. Never used as a decorative accent. */
+  --color-done: #2f6b4f;
+}
+
+@theme inline {
+  --color-paper: var(--color-paper);
+  --color-stone: var(--color-stone);
+  --color-ink: var(--color-ink);
+  --color-mute: var(--color-mute);
+  --color-line: var(--color-line);
+  --color-pole: var(--color-pole);
+  --color-brass: var(--color-brass);
+  --color-brass-ink: var(--color-brass-ink);
+  --color-done: var(--color-done);
+  --font-sans: var(--font-inter);
+  --font-display: var(--font-roboto-condensed);
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background: var(--color-paper);
+  color: var(--color-ink);
+  font-family: var(--font-inter), system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+h1,
+h2,
+h3 {
+  font-family: var(--font-roboto-condensed), var(--font-inter), sans-serif;
+  line-height: 0.94;
+  letter-spacing: -0.01em;
+}
+
+/* --- Browser surfaces: the parts you don't draw still carry the design --- */
+
+::selection {
+  background: var(--color-brass);
+  color: var(--color-ink);
+}
+
+input,
+textarea,
+select {
+  caret-color: var(--color-pole);
+}
+
+:focus-visible {
+  outline: 2px solid var(--color-pole);
+  outline-offset: 3px;
+}
+
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-line) transparent;
+}
+*::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+*::-webkit-scrollbar-track {
+  background: transparent;
+}
+*::-webkit-scrollbar-thumb {
+  background: var(--color-line);
+  border: 3px solid transparent;
+  background-clip: content-box;
+}
+*::-webkit-scrollbar-thumb:hover {
+  background: var(--color-mute);
+  background-clip: content-box;
+}
+
+.on-ink {
+  scrollbar-color: #3a3a38 transparent;
+}
+.on-ink::-webkit-scrollbar-thumb {
+  background: #3a3a38;
+  background-clip: content-box;
+}
+
+/* Times, prices and any figure read in a column line up on their digits. */
+.tnum {
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum" 1;
+}
+
+/* --- Motion: one authored entrance, exponential ease-out from a visible default --- */
+
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.rise {
+  animation: rise 0.42s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  .rise {
+    animation: none;
+  }
+}

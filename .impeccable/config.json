@@ -1,0 +1,14 @@
+{
+  "detector": {
+    "ignoreRules": [],
+    "ignoreFiles": [],
+    "ignoreValues": [
+      {
+        "rule": "overused-font",
+        "value": "arial",
+        "createdAt": "2026-09-17T10:54:43.300Z",
+        "reason": "email HTML template (booking confirmation), not web UI — Arial/sans-serif is the standard safe fallback for transactional email since most email clients (Outlook etc.) don't support web fonts"
+      }
+    ]
+  }
+}

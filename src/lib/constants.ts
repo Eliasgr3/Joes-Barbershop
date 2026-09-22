@@ -1,4 +1,4 @@
-export const SLOT_GRANULARITY_MIN = 15;
+export const SLOT_GRANULARITY_MIN = 30;
 export const BOOKING_HORIZON_DAYS = 30;
 export const SHOP_TIMEZONE = 'Europe/Athens';
 

@@ -13,7 +13,7 @@ type ComputeSlotsArgs = {
 };
 
 /** 'YYYY-MM-DD' + 'HH:MM:SS' in a fixed local offset, treated as shop-local wall-clock time. */
-function localDateTimeToUTC(date: string, time: string, offsetMinutes: number): Date {
+export function localDateTimeToUTC(date: string, time: string, offsetMinutes: number): Date {
   const [h, m, s] = time.split(':').map(Number);
   const [y, mo, d] = date.split('-').map(Number);
   // Build as if UTC, then subtract the local offset to get the true UTC instant.
@@ -25,7 +25,7 @@ function localDateTimeToUTC(date: string, time: string, offsetMinutes: number): 
  * Europe/Athens offset (in minutes ahead of UTC) for a given date, accounting for DST
  * (EET/UTC+2 in winter, EEST/UTC+3 in summer). Computed via Intl rather than hardcoded.
  */
-function athensOffsetMinutes(date: string): number {
+export function athensOffsetMinutes(date: string): number {
   const probe = new Date(`${date}T12:00:00Z`);
   const parts = new Intl.DateTimeFormat('en-US', {
     timeZone: 'Europe/Athens',

@@ -3,6 +3,7 @@
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 import { createSupabaseServerClient } from '@/lib/supabase/server';
+import { athensOffsetMinutes, localDateTimeToUTC } from '@/lib/availability';
 import {
   barberFormSchema,
   manualAppointmentSchema,
@@ -157,10 +158,15 @@ export async function createManualAppointment(
 ): Promise<ActionResult> {
   const date = String(formData.get('date') ?? '');
   const time = String(formData.get('time') ?? '');
+  // The admin types a wall-clock time meaning "Athens local time" — the server this runs on
+  // is not itself in Athens, so this needs the same DST-aware conversion the public booking
+  // flow uses (a plain `new Date(...)`  here would silently be off by 2-3 hours in production).
+  const startsAtIso =
+    date && time ? localDateTimeToUTC(date, `${time}:00`, athensOffsetMinutes(date)).toISOString() : '';
   const parsed = manualAppointmentSchema.safeParse({
     barberId: formData.get('barberId'),
     serviceId: formData.get('serviceId'),
-    startsAt: date && time ? new Date(`${date}T${time}:00`).toISOString() : '',
+    startsAt: startsAtIso,
     customerName: formData.get('customerName'),
     customerPhone: formData.get('customerPhone'),
     customerEmail: formData.get('customerEmail') ?? '',

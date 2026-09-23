@@ -58,6 +58,12 @@ export function Hero() {
           >
             Τηλεφώνησε · {SHOP_INFO.phoneDisplay}
           </a>
+          <Link
+            href="/manage"
+            className="mt-1 text-sm text-white/50 underline underline-offset-4 transition-colors hover:text-white"
+          >
+            Έκλεισες ήδη; Δες το ραντεβού σου
+          </Link>
         </div>
 
         <p className="mt-10 text-xs tracking-[0.2em] text-white/35">↓</p>

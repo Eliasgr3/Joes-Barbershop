@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import { SHOP_INFO } from '@/lib/constants';
-import { CalendarIcon, RazorIcon } from '@/components/ui/Icon';
+import { RazorIcon } from '@/components/ui/Icon';
 
 export function SiteFooter() {
   return (
@@ -14,13 +14,6 @@ export function SiteFooter() {
           </a>
         </p>
         <div className="flex shrink-0 flex-wrap gap-2">
-          <Link
-            href="/manage"
-            className="inline-flex items-center justify-center gap-2 border border-white/15 px-4 py-2.5 text-xs font-semibold tracking-[0.1em] text-[#8B8985] uppercase no-underline transition-colors hover:border-brass hover:text-brass"
-          >
-            <CalendarIcon className="h-3.5 w-3.5" />
-            Το ραντεβού μου
-          </Link>
           <Link
             href="/admin"
             className="inline-flex items-center justify-center gap-2 border border-white/15 px-4 py-2.5 text-xs font-semibold tracking-[0.1em] text-[#8B8985] uppercase no-underline transition-colors hover:border-brass hover:text-brass"

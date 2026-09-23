@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createSupabaseAdminClient } from '@/lib/supabase/admin';
-import { computeAvailableSlots, type WorkingHours } from '@/lib/availability';
+import { computeAvailableSlots, type TimeOff, type WorkingHours } from '@/lib/availability';
 import { availabilityQuerySchema } from '@/lib/validation';
 import { FALLBACK_SERVICES } from '@/lib/fallback-data';
 import { FALLBACK_WORKING_HOURS } from '@/lib/fallback-hours';
@@ -27,7 +27,7 @@ export async function GET(request: NextRequest) {
     }
     const slots = computeAvailableSlots({
       workingHours: FALLBACK_WORKING_HOURS,
-      daysOff: new Set(),
+      timeOff: [],
       date,
       durationMin: service.duration_min,
       existingAppointments: [],
@@ -42,7 +42,7 @@ export async function GET(request: NextRequest) {
     await Promise.all([
       supabase.from('services').select('duration_min').eq('id', serviceId).single(),
       supabase.from('barber_working_hours').select('weekday, start_time, end_time').eq('barber_id', barberId),
-      supabase.from('barber_days_off').select('off_date').eq('barber_id', barberId),
+      supabase.from('barber_days_off').select('*').eq('barber_id', barberId).eq('off_date', date),
       supabase
         .from('appointments')
         .select('starts_at, ends_at')
@@ -61,7 +61,11 @@ export async function GET(request: NextRequest) {
     startTime: h.start_time,
     endTime: h.end_time,
   }));
-  const daysOff = new Set((daysOffRows ?? []).map((d) => d.off_date));
+  const timeOff: TimeOff[] = (daysOffRows ?? []).map((d) => ({
+    date: d.off_date,
+    startTime: d.start_time ?? null,
+    endTime: d.end_time ?? null,
+  }));
   const existingAppointments = (appointmentRows ?? []).map((a) => ({
     startsAt: a.starts_at,
     endsAt: a.ends_at,
@@ -69,7 +73,7 @@ export async function GET(request: NextRequest) {
 
   const slots = computeAvailableSlots({
     workingHours,
-    daysOff,
+    timeOff,
     date,
     durationMin: service.duration_min,
     existingAppointments,

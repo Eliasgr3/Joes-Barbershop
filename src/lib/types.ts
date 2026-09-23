@@ -22,6 +22,9 @@ export type BarberDayOff = {
   barber_id: string;
   off_date: string; // 'YYYY-MM-DD'
   reason: string | null;
+  // Both null = the whole day is off. Both set = only that window is blocked.
+  start_time: string | null; // 'HH:MM:SS'
+  end_time: string | null;
 };
 
 export type Service = {

@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createSupabaseAdminClient } from '@/lib/supabase/admin';
-import { computeAvailableSlots, type WorkingHours } from '@/lib/availability';
+import { computeAvailableSlots, type TimeOff, type WorkingHours } from '@/lib/availability';
 import { bookingRequestSchema } from '@/lib/validation';
 import { sendBookingConfirmationEmail } from '@/lib/email';
 
@@ -48,7 +48,7 @@ export async function POST(request: NextRequest) {
 
   const [{ data: hoursRows }, { data: daysOffRows }, { data: appointmentRows }] = await Promise.all([
     supabase.from('barber_working_hours').select('weekday, start_time, end_time').eq('barber_id', barberId),
-    supabase.from('barber_days_off').select('off_date').eq('barber_id', barberId),
+    supabase.from('barber_days_off').select('*').eq('barber_id', barberId).eq('off_date', date),
     supabase
       .from('appointments')
       .select('starts_at, ends_at')
@@ -63,7 +63,11 @@ export async function POST(request: NextRequest) {
     startTime: h.start_time,
     endTime: h.end_time,
   }));
-  const daysOff = new Set((daysOffRows ?? []).map((d) => d.off_date));
+  const timeOff: TimeOff[] = (daysOffRows ?? []).map((d) => ({
+    date: d.off_date,
+    startTime: d.start_time ?? null,
+    endTime: d.end_time ?? null,
+  }));
   const existingAppointments = (appointmentRows ?? []).map((a) => ({
     startsAt: a.starts_at,
     endsAt: a.ends_at,
@@ -71,7 +75,7 @@ export async function POST(request: NextRequest) {
 
   const availableSlots = computeAvailableSlots({
     workingHours,
-    daysOff,
+    timeOff,
     date,
     durationMin: service.duration_min,
     existingAppointments,
@@ -124,6 +128,7 @@ export async function POST(request: NextRequest) {
       barberName: barber.name,
       startsAtIso: startDate.toISOString(),
       priceCents: service.price_cents,
+      appointmentId: appointment.id,
     });
     if (confirmationEmailSent) {
       await supabase.from('appointments').update({ confirmation_email_sent: true }).eq('id', appointment.id);

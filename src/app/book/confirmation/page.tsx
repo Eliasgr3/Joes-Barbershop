@@ -9,6 +9,7 @@ export const metadata = {
 };
 
 type SearchParams = {
+  id?: string;
   barberName?: string;
   serviceName?: string;
   startsAt?: string;
@@ -140,13 +141,24 @@ export default async function ConfirmationPage({ searchParams }: { searchParams:
           </a>
         </div>
 
-        <p className="mt-9 text-center text-sm text-white/45">
-          Άλλαξαν τα σχέδιά σου;{' '}
-          <a href={`tel:${SHOP_INFO.phone}`} className="inline-flex items-center gap-1.5 text-white underline">
-            <PhoneIcon className="h-3.5 w-3.5" />
-            {SHOP_INFO.phoneDisplay}
-          </a>
-        </p>
+        <div className="mt-9 text-center">
+          <p className="text-sm text-white/45">Άλλαξαν τα σχέδιά σου;</p>
+          {params.id && (
+            <p className="mt-2 text-sm">
+              <Link href={`/cancel/${params.id}`} className="text-white underline underline-offset-4">
+                Ακύρωσε το ραντεβού
+              </Link>
+              <span className="text-white/45"> — κράτα αυτή τη σελίδα για να τη βρεις ξανά.</span>
+            </p>
+          )}
+          <p className="mt-2 text-sm text-white/45">
+            ή κάλεσέ μας στο{' '}
+            <a href={`tel:${SHOP_INFO.phone}`} className="inline-flex items-center gap-1.5 text-white underline">
+              <PhoneIcon className="h-3.5 w-3.5" />
+              {SHOP_INFO.phoneDisplay}
+            </a>
+          </p>
+        </div>
 
         <div className="mt-10 text-center">
           <Link href="/" className="text-sm text-white/45 no-underline transition-colors hover:text-white">

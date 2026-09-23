@@ -25,11 +25,13 @@ export async function GET(request: NextRequest) {
   const supabase = createSupabaseAdminClient();
   const [{ data: hours }, { data: daysOff }] = await Promise.all([
     supabase.from('barber_working_hours').select('weekday').eq('barber_id', barberId),
-    supabase.from('barber_days_off').select('off_date').eq('barber_id', barberId),
+    supabase.from('barber_days_off').select('*').eq('barber_id', barberId),
   ]);
 
   return NextResponse.json({
     weekdays: (hours ?? []).map((h) => h.weekday),
-    daysOff: (daysOff ?? []).map((d) => d.off_date),
+    // Only whole-day closures grey out a date here. A partial block still leaves the day
+    // bookable, so it's handled by the slot list rather than by disabling the date.
+    daysOff: (daysOff ?? []).filter((d) => d.start_time == null).map((d) => d.off_date),
   });
 }

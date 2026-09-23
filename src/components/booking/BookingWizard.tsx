@@ -86,6 +86,7 @@ export function BookingWizard() {
       }
 
       const params = new URLSearchParams({
+        id: data.id,
         barberName: data.barberName,
         serviceName: data.serviceName,
         startsAt: data.startsAt,

@@ -134,14 +134,43 @@ export async function setWorkingHours(barberId: string, formData: FormData): Pro
   revalidatePath(`/admin/barbers/${barberId}`);
 }
 
-export async function addDayOff(barberId: string, formData: FormData): Promise<void> {
+export async function addDayOff(
+  barberId: string,
+  _prev: ActionResult | null,
+  formData: FormData,
+): Promise<ActionResult> {
   const offDate = String(formData.get('offDate') ?? '');
   const reason = String(formData.get('reason') ?? '');
-  if (!offDate) return;
+  const scope = String(formData.get('scope') ?? 'full');
+  const startTime = String(formData.get('startTime') ?? '');
+  const endTime = String(formData.get('endTime') ?? '');
+
+  if (!offDate) return { ok: false, message: 'Διάλεξε ημερομηνία.' };
+
+  const partial = scope === 'partial';
+  if (partial) {
+    if (!startTime || !endTime) return { ok: false, message: 'Συμπλήρωσε ώρα από και ώρα έως.' };
+    if (startTime >= endTime) return { ok: false, message: 'Η ώρα λήξης πρέπει να είναι μετά την ώρα έναρξης.' };
+  }
 
   const supabase = await createSupabaseServerClient();
-  await supabase.from('barber_days_off').insert({ barber_id: barberId, off_date: offDate, reason: reason || null });
+  const { error } = await supabase.from('barber_days_off').insert({
+    barber_id: barberId,
+    off_date: offDate,
+    reason: reason || null,
+    start_time: partial ? `${startTime}:00` : null,
+    end_time: partial ? `${endTime}:00` : null,
+  });
+
+  if (error) {
+    // The partial unique index rejects a second whole-day entry for the same date.
+    if (error.code === '23505') return { ok: false, message: 'Αυτή η ημέρα είναι ήδη κλειστή.' };
+    return { ok: false, message: error.message };
+  }
+
   revalidatePath(`/admin/barbers/${barberId}`);
+  revalidatePath('/admin');
+  return { ok: true };
 }
 
 export async function removeDayOff(barberId: string, dayOffId: string): Promise<void> {

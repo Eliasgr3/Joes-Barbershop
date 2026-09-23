@@ -3,9 +3,15 @@ import { SLOT_GRANULARITY_MIN } from '@/lib/constants';
 export type WorkingHours = { weekday: number; startTime: string; endTime: string };
 export type ExistingAppointment = { startsAt: string; endsAt: string };
 
+/**
+ * A block of time the barber isn't available, on one specific date.
+ * `startTime`/`endTime` null means the whole day is off; otherwise only that window is blocked.
+ */
+export type TimeOff = { date: string; startTime: string | null; endTime: string | null };
+
 type ComputeSlotsArgs = {
   workingHours: WorkingHours[]; // this barber's rows for every weekday they work
-  daysOff: Set<string>; // 'YYYY-MM-DD' dates this barber is off
+  timeOff: TimeOff[]; // full days off and partial blocked windows
   date: string; // 'YYYY-MM-DD', the day being queried
   durationMin: number; // the selected service's duration
   existingAppointments: ExistingAppointment[]; // this barber's OTHER booked appointments that day
@@ -40,6 +46,11 @@ function overlaps(aStart: Date, aEnd: Date, bStart: Date, bEnd: Date): boolean {
   return aStart < bEnd && bStart < aEnd;
 }
 
+/** True when the whole of `date` is marked off (as opposed to a partial window). */
+export function isFullDayOff(timeOff: TimeOff[], date: string): boolean {
+  return timeOff.some((t) => t.date === date && t.startTime === null);
+}
+
 /**
  * Computes bookable start times for one barber, one service, one day.
  * Pure function — no I/O — so it's unit-testable and reusable from both
@@ -47,13 +58,13 @@ function overlaps(aStart: Date, aEnd: Date, bStart: Date, bEnd: Date): boolean {
  */
 export function computeAvailableSlots({
   workingHours,
-  daysOff,
+  timeOff,
   date,
   durationMin,
   existingAppointments,
   now,
 }: ComputeSlotsArgs): string[] {
-  if (daysOff.has(date)) return [];
+  if (isFullDayOff(timeOff, date)) return [];
 
   const weekday = new Date(`${date}T12:00:00Z`).getUTCDay();
   const hours = workingHours.find((h) => h.weekday === weekday);
@@ -67,6 +78,15 @@ export function computeAvailableSlots({
     start: new Date(a.startsAt),
     end: new Date(a.endsAt),
   }));
+
+  // Partial blocks for this date behave exactly like an existing appointment: unbookable.
+  for (const block of timeOff) {
+    if (block.date !== date || block.startTime === null || block.endTime === null) continue;
+    busy.push({
+      start: localDateTimeToUTC(date, block.startTime, offsetMinutes),
+      end: localDateTimeToUTC(date, block.endTime, offsetMinutes),
+    });
+  }
 
   const slots: string[] = [];
   const stepMs = SLOT_GRANULARITY_MIN * 60_000;

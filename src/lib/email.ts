@@ -9,6 +9,7 @@ type ConfirmationEmailArgs = {
   barberName: string;
   startsAtIso: string;
   priceCents: number;
+  appointmentId: string;
 };
 
 function formatAthensDateTime(iso: string): string {
@@ -38,6 +39,13 @@ export async function sendBookingConfirmationEmail(args: ConfirmationEmailArgs):
 
   const resend = new Resend(apiKey);
   const from = process.env.RESEND_FROM_EMAIL || 'Joe’s Barbershop <onboarding@resend.dev>';
+  // NEXT_PUBLIC_SITE_URL wins if set; Netlify injects URL automatically for the deployed site.
+  const siteUrl = (
+    process.env.NEXT_PUBLIC_SITE_URL ||
+    process.env.URL ||
+    'https://joesbarbershopgr.netlify.app'
+  ).replace(/\/$/, '');
+  const cancelUrl = `${siteUrl}/cancel/${args.appointmentId}`;
   const when = formatAthensDateTime(args.startsAtIso);
   const price = (args.priceCents / 100).toFixed(2).replace('.', ',');
 
@@ -57,7 +65,11 @@ export async function sendBookingConfirmationEmail(args: ConfirmationEmailArgs):
           <tr><td style="padding:6px 0;color:#6e6e6b">Τιμή</td><td style="padding:6px 0;text-align:right">${price}€ (πληρωμή στο κατάστημα)</td></tr>
         </table>
         <p style="color:#6e6e6b">${escapeHtml(SHOP_INFO.address)} · ${SHOP_INFO.phoneDisplay}</p>
-        <p style="color:#6e6e6b;font-size:13px">Για αλλαγή ή ακύρωση ραντεβού, καλέστε μας στο ${SHOP_INFO.phoneDisplay}.</p>
+        <p style="font-size:13px;color:#6e6e6b">
+          Άλλαξαν τα σχέδιά σου;
+          <a href="${cancelUrl}" style="color:#101010">Ακύρωσε το ραντεβού σου</a>
+          ή κάλεσέ μας στο ${SHOP_INFO.phoneDisplay}.
+        </p>
       </div>
     `,
   });

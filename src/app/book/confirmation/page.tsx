@@ -148,9 +148,14 @@ export default async function ConfirmationPage({ searchParams }: { searchParams:
               <Link href={`/cancel/${params.id}`} className="text-white underline underline-offset-4">
                 Ακύρωσε το ραντεβού
               </Link>
-              <span className="text-white/45"> — κράτα αυτή τη σελίδα για να τη βρεις ξανά.</span>
             </p>
           )}
+          <p className="mt-2 text-sm text-white/45">
+            Αργότερα, βρες το ξανά με το τηλέφωνό σου στο{' '}
+            <Link href="/manage" className="text-white underline underline-offset-4">
+              Το ραντεβού μου
+            </Link>
+          </p>
           <p className="mt-2 text-sm text-white/45">
             ή κάλεσέ μας στο{' '}
             <a href={`tel:${SHOP_INFO.phone}`} className="inline-flex items-center gap-1.5 text-white underline">

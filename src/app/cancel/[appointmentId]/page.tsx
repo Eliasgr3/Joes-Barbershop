@@ -46,6 +46,11 @@ function NotFound({ message }: { message: string }) {
       <div className="text-center">
         <h1 className="text-3xl font-black uppercase">Δεν βρέθηκε</h1>
         <p className="mx-auto mt-4 max-w-[34ch] text-sm text-white/55">{message}</p>
+        <p className="mx-auto mt-4 max-w-[34ch] text-sm">
+          <Link href="/manage" className="text-white underline underline-offset-4">
+            Βρες το ραντεβού σου με το τηλέφωνό σου
+          </Link>
+        </p>
         <a
           href={`tel:${SHOP_INFO.phone}`}
           className="mt-7 inline-flex items-center gap-2 border border-white/25 px-6 py-3.5 text-sm font-semibold text-white no-underline transition-colors hover:border-white"

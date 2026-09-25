@@ -53,7 +53,8 @@ export async function POST(request: NextRequest) {
       .from('appointments')
       .select('starts_at, ends_at')
       .eq('barber_id', barberId)
-      .eq('status', 'booked')
+      // Mirrors /api/availability: a completed visit keeps its time occupied.
+      .in('status', ['booked', 'completed'])
       .gte('starts_at', `${date}T00:00:00Z`)
       .lte('starts_at', `${date}T23:59:59Z`),
   ]);

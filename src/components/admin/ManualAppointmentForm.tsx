@@ -85,6 +85,33 @@ export function ManualAppointmentForm({ barbers, services }: { barbers: Barber[]
 
   return (
     <form ref={formRef} action={formAction} className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      {/* Failures sit at the TOP of the form: when this was a small line underneath, a rejected
+          booking could be mistaken for a saved one and the appointment was silently lost. */}
+      {state && !state.ok && (
+        <p
+          role="alert"
+          className="flex items-start gap-3 border-2 border-pole bg-pole/10 p-4 text-base font-semibold text-pole sm:col-span-2 lg:col-span-4"
+        >
+          <AlertIcon className="mt-0.5 h-6 w-6 shrink-0" />
+          <span>
+            ΔΕΝ ΑΠΟΘΗΚΕΥΤΗΚΕ — {state.message}
+            <span className="mt-1 block text-sm font-normal">
+              Το ραντεβού δεν καταχωρήθηκε. Διάλεξε άλλη ώρα και δοκίμασε ξανά.
+            </span>
+          </span>
+        </p>
+      )}
+
+      {state && state.ok && (
+        <p
+          role="status"
+          className="flex items-center gap-3 border-2 border-done bg-done/10 p-4 text-base font-semibold text-done sm:col-span-2 lg:col-span-4"
+        >
+          <CheckIcon className="h-6 w-6 shrink-0" />
+          Το ραντεβού καταχωρήθηκε.
+        </p>
+      )}
+
       <label className="block">
         <span className={label}>Κουρέας</span>
         <select
@@ -201,20 +228,6 @@ export function ManualAppointmentForm({ barbers, services }: { barbers: Barber[]
         <span className={label}>Σημείωση</span>
         <input type="text" name="notes" placeholder="προαιρετικό" className={input} />
       </label>
-
-      {state && !state.ok && (
-        <p className="flex items-start gap-2 text-sm text-pole sm:col-span-2 lg:col-span-4">
-          <AlertIcon className="mt-0.5 h-4 w-4 shrink-0" />
-          {state.message}
-        </p>
-      )}
-
-      {state && state.ok && (
-        <p className="flex items-center gap-2 text-sm text-done sm:col-span-2 lg:col-span-4">
-          <CheckIcon className="h-4 w-4 shrink-0" />
-          Το ραντεβού καταχωρήθηκε.
-        </p>
-      )}
 
       <div className="sm:col-span-2 lg:col-span-4">
         <button type="submit" disabled={pending} className={buttonPrimary}>

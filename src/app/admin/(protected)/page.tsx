@@ -156,17 +156,18 @@ export default async function AdminDashboardPage({
               .filter((a) => a.barber_id === barber.id)
               .sort((a, b) => a.starts_at.localeCompare(b.starts_at));
 
+            // Cancelled rows sat in the list at their old time, right beside the booking that
+            // replaced them, which read as a double booking. They're tucked away instead.
+            const active = dayAppointments.filter((a) => a.status !== 'cancelled');
+            const cancelled = dayAppointments.filter((a) => a.status === 'cancelled');
+
             return (
               <Panel
                 key={barber.id}
                 title={barber.name}
-                action={
-                  <span className="tnum text-xs text-mute">
-                    {dayAppointments.filter((a) => a.status !== 'cancelled').length} ραντεβού
-                  </span>
-                }
+                action={<span className="tnum text-xs text-mute">{active.length} ραντεβού</span>}
               >
-                {dayAppointments.length === 0 ? (
+                {active.length === 0 ? (
                   <EmptyState
                     icon={<CalendarIcon className="h-6 w-6" />}
                     title="Καμία κράτηση"
@@ -174,10 +175,23 @@ export default async function AdminDashboardPage({
                   />
                 ) : (
                   <div className="divide-y divide-line">
-                    {dayAppointments.map((appointment) => (
+                    {active.map((appointment) => (
                       <AppointmentRow key={appointment.id} appointment={appointment} />
                     ))}
                   </div>
+                )}
+
+                {cancelled.length > 0 && (
+                  <details className="border-t border-line">
+                    <summary className="cursor-pointer px-5 py-3 text-xs text-mute">
+                      {cancelled.length} ακυρωμένα — δες τα
+                    </summary>
+                    <div className="divide-y divide-line border-t border-line">
+                      {cancelled.map((appointment) => (
+                        <AppointmentRow key={appointment.id} appointment={appointment} />
+                      ))}
+                    </div>
+                  </details>
                 )}
               </Panel>
             );

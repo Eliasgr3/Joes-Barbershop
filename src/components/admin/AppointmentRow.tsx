@@ -1,6 +1,6 @@
 import type { AppointmentWithRelations } from '@/lib/types';
 import { StatusBadge } from '@/components/admin/StatusBadge';
-import { StatusActions } from '@/components/admin/StatusActions';
+import { RevertStatusAction, StatusActions } from '@/components/admin/StatusActions';
 import { SHOP_TIMEZONE } from '@/lib/constants';
 
 function time(iso: string): string {
@@ -49,6 +49,9 @@ export function AppointmentRow({
         </a>
         {appointment.notes && <p className="mt-1.5 text-sm text-mute italic">{appointment.notes}</p>}
         {appointment.status === 'booked' && <StatusActions appointmentId={appointment.id} />}
+        {(appointment.status === 'completed' || appointment.status === 'no_show') && (
+          <RevertStatusAction appointmentId={appointment.id} />
+        )}
       </div>
 
       <div className="tnum shrink-0 pt-0.5 text-right">

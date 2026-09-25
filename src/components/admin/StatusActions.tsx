@@ -10,6 +10,21 @@ const ACTIONS: { status: AppointmentStatus; label: string; tone: string }[] = [
   { status: 'cancelled', label: 'Ακύρωση', tone: 'hover:border-pole hover:text-pole' },
 ];
 
+/** Undo for a mis-tapped "Ήρθε"/"Δεν ήρθε" — without it a wrong tap is permanent. */
+export function RevertStatusAction({ appointmentId }: { appointmentId: string }) {
+  const [pending, startTransition] = useTransition();
+  return (
+    <button
+      type="button"
+      disabled={pending}
+      onClick={() => startTransition(() => updateAppointmentStatus(appointmentId, 'booked'))}
+      className="mt-2.5 border border-line px-2.5 py-1 text-xs text-mute transition-colors hover:border-ink hover:text-ink disabled:cursor-not-allowed"
+    >
+      {pending ? 'Αναίρεση…' : 'Αναίρεση'}
+    </button>
+  );
+}
+
 export function StatusActions({ appointmentId }: { appointmentId: string }) {
   const [pending, startTransition] = useTransition();
 

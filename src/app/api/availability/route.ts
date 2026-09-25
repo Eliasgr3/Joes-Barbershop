@@ -47,7 +47,9 @@ export async function GET(request: NextRequest) {
         .from('appointments')
         .select('starts_at, ends_at')
         .eq('barber_id', barberId)
-        .eq('status', 'booked')
+        // A finished visit still used up that time. Only a cancellation (or a no-show,
+        // where the barber deliberately frees the chair) reopens a slot.
+        .in('status', ['booked', 'completed'])
         .gte('starts_at', `${date}T00:00:00Z`)
         .lte('starts_at', `${date}T23:59:59Z`),
     ]);

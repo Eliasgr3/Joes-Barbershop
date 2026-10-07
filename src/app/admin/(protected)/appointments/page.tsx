@@ -1,4 +1,4 @@
-import { getAllBarbers, getAllServices, getAppointments } from '@/lib/admin-data';
+import { getAllBarbers, getAllServices, getAppointments, getKnownCustomers } from '@/lib/admin-data';
 import { ManualAppointmentForm } from '@/components/admin/ManualAppointmentForm';
 import { AppointmentRow } from '@/components/admin/AppointmentRow';
 import { STATUS_LABELS } from '@/components/admin/StatusBadge';
@@ -35,9 +35,10 @@ export default async function AdminAppointmentsPage({
   searchParams: Promise<SearchParams>;
 }) {
   const params = await searchParams;
-  const [barbers, services, appointments] = await Promise.all([
+  const [barbers, services, customers, appointments] = await Promise.all([
     getAllBarbers(),
     getAllServices(),
+    getKnownCustomers(),
     getAppointments({
       from: params.from ? `${params.from}T00:00:00Z` : undefined,
       to: params.to ? `${params.to}T23:59:59Z` : undefined,
@@ -62,6 +63,7 @@ export default async function AdminAppointmentsPage({
           <ManualAppointmentForm
             barbers={barbers.filter((b) => b.is_active)}
             services={services.filter((s) => s.is_active)}
+            customers={customers}
           />
         </div>
       </details>

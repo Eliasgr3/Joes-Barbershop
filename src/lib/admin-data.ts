@@ -1,5 +1,6 @@
 import { createSupabaseServerClient } from '@/lib/supabase/server';
 import { isSupabaseConfigured } from '@/lib/config';
+import { dedupeCustomers, type KnownCustomer } from '@/lib/customer-search';
 import type { AppointmentStatus, AppointmentWithRelations, Barber, BarberDayOff, BarberWorkingHours, Service } from '@/lib/types';
 
 // Every function here guards on isSupabaseConfigured() and returns an empty/default result
@@ -48,6 +49,18 @@ export async function getDaysOff(barberId: string): Promise<BarberDayOff[]> {
     .eq('barber_id', barberId)
     .order('off_date');
   return data ?? [];
+}
+
+/** Everyone who has ever had a booking, most recent first. Feeds the walk-in form's name suggestions. */
+export async function getKnownCustomers(): Promise<KnownCustomer[]> {
+  if (!isSupabaseConfigured()) return [];
+  const supabase = await createSupabaseServerClient();
+  const { data } = await supabase
+    .from('appointments')
+    .select('customer_name, customer_phone')
+    .order('created_at', { ascending: false })
+    .limit(2000);
+  return dedupeCustomers(data ?? []);
 }
 
 type AppointmentFilters = {

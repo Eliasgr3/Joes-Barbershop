@@ -5,6 +5,8 @@ import { createManualAppointment, type ActionResult } from '@/lib/admin-actions'
 import type { Barber, Service } from '@/lib/types';
 import { AlertIcon, CheckIcon, ClockIcon } from '@/components/ui/Icon';
 import { buttonPrimary, input, label } from '@/components/admin/styles';
+import { CustomerNameField } from '@/components/admin/CustomerNameField';
+import type { KnownCustomer } from '@/lib/customer-search';
 import { SHOP_TIMEZONE } from '@/lib/constants';
 
 const initialState: ActionResult | null = null;
@@ -36,7 +38,15 @@ function isoToTimeInputValue(iso: string): string {
   }).format(new Date(iso));
 }
 
-export function ManualAppointmentForm({ barbers, services }: { barbers: Barber[]; services: Service[] }) {
+export function ManualAppointmentForm({
+  barbers,
+  services,
+  customers,
+}: {
+  barbers: Barber[];
+  services: Service[];
+  customers: KnownCustomer[];
+}) {
   const [state, formAction, pending] = useActionState(createManualAppointment, initialState);
   const formRef = useRef<HTMLFormElement>(null);
 
@@ -44,6 +54,8 @@ export function ManualAppointmentForm({ barbers, services }: { barbers: Barber[]
   const [serviceId, setServiceId] = useState(services[0]?.id ?? '');
   const [date, setDate] = useState(todayLocal());
   const [time, setTime] = useState('');
+  const [customerName, setCustomerName] = useState('');
+  const [customerPhone, setCustomerPhone] = useState('');
 
   const requestKey = barberId && serviceId && date ? `${barberId}|${serviceId}|${date}` : '';
   const [slotsResult, setSlotsResult] = useState<{ forKey: string; slots: string[] }>({
@@ -80,6 +92,8 @@ export function ManualAppointmentForm({ barbers, services }: { barbers: Barber[]
       formRef.current?.reset();
       setTime('');
       setDate(todayLocal());
+      setCustomerName('');
+      setCustomerPhone('');
     });
   }, [state]);
 
@@ -214,14 +228,27 @@ export function ManualAppointmentForm({ barbers, services }: { barbers: Barber[]
         )}
       </div>
 
-      <label className="block">
-        <span className={label}>Όνομα πελάτη</span>
-        <input type="text" name="customerName" required autoComplete="off" className={input} />
-      </label>
+      <CustomerNameField
+        customers={customers}
+        value={customerName}
+        onChange={setCustomerName}
+        onPick={(customer) => {
+          setCustomerName(customer.name);
+          setCustomerPhone(customer.phone);
+        }}
+      />
 
       <label className="block">
         <span className={label}>Τηλέφωνο</span>
-        <input type="tel" name="customerPhone" required autoComplete="off" className={`tnum ${input}`} />
+        <input
+          type="tel"
+          name="customerPhone"
+          required
+          autoComplete="off"
+          value={customerPhone}
+          onChange={(e) => setCustomerPhone(e.target.value)}
+          className={`tnum ${input}`}
+        />
       </label>
 
       <label className="block sm:col-span-2">
